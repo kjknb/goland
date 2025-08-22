@@ -1,0 +1,1 @@
+{"swagger":"2.0","info":{"contact":{}},"paths":{"/index":{"get":{"consumes":["application/json"],"tags":["首页"],"responses":{"200":{"description":"OK","schema":{"type":"string"}}}}},"/user/GetUserList":{"get":{"tags":["首页"],"responses":{"200":{"description":"code\",\"message\"}","schema":{"type":"string"}}}}}}}
