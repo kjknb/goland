@@ -37,6 +37,23 @@ func GetUserList() []*UserBasic {
 
 }
 
+func FindUserByName(name string) UserBasic {
+	user := UserBasic{}
+	utils.DB.Where("name = ?", name).First(&user)
+	return user
+}
+
+func FindUserByPhone(name string) *gorm.DB {
+	Phone := UserBasic{}
+	return utils.DB.Where("Phone = ?", Phone).First(&Phone)
+
+}
+func FindUserByEmail(name string) *gorm.DB {
+	Email := UserBasic{}
+	return utils.DB.Where("Email = ?", Email).First(&Email)
+
+}
+
 func CreateUser(user UserBasic) *gorm.DB {
 
 	return utils.DB.Create(&user)
