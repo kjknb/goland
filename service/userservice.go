@@ -2,11 +2,14 @@ package service
 
 import (
 	"GInchat/models"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 // GetUserList
-// @Tags 首页
+// @Summary 所有用户
+// @Tags 用户模块
 // @Success 200 {string} JSON{"code","message"}
 // @Router /user/GetUserList [get]
 func GetUserList(c *gin.Context) {
@@ -20,24 +23,68 @@ func GetUserList(c *gin.Context) {
 }
 
 // CreateUser
-// @Tags 首页
-// @Success 200 {string} JSON{"code","message"}
-// @Router /user/CreateUser [get]
+// @Summary 新增用户
+// @Tags 用户模块
+// @param name query string false "用户名"
+// @param password query string false "密码"
+// @param repassword query string false "确认密码"
+// @Success 200 {string} json{"code","message"}
+// @Router /user/createUser [get]
 func CreateUser(c *gin.Context) {
 	user := models.UserBasic{}
 	user.Name = c.Query("name")
-	Password := c.Query("password")
-	rePassword := c.Query("repassord")
-	if Password != rePassword {
-		return
+	password := c.Query("password")
+	repassword := c.Query("repassword")
+	if password != repassword {
+		c.JSON(-1, gin.H{
+			"message": "密码不一致",
+		})
 	}
-	c.JSON(-1, gin.H{
-		"message": "密码不一致",
-	})
-	user.Password = Password
+	user.Password = password
 	models.CreateUser(user)
-	c.JSON(100, gin.H{
+	c.JSON(200, gin.H{
 		"message": "新增用户成功",
 	})
+}
 
+// DeleteUser
+// @Summary 删除用户
+// @Tags 用户模块
+// @param id query string false "id"
+// @Success 200 {string} json{"code","message"}
+// @Router /user/deleteUser [get]
+func DeleteUser(c *gin.Context) {
+	user := models.UserBasic{}
+	id, _ := strconv.Atoi(c.Query("id"))
+	user.ID = uint(id)
+	models.DeleteUser(user)
+	c.JSON(200, gin.H{
+		"message": "删除用户成功",
+		"data":    user,
+	})
+
+}
+
+// UpdateUser
+// @Summary 修改用户
+// @Tags 用户模块
+// @param id formData string false "id"
+// @param name formData string false "name"
+// @param password formData string false "password"
+// @Success 200 {string} json{"code","message"}
+// @Router /user/updateUser [post]
+func UpdateUser(c *gin.Context) {
+	user := models.UserBasic{}
+	id, _ := strconv.Atoi(c.PostForm("id"))
+	user.ID = uint(id)
+	user.Name = c.PostForm("name")
+	user.Password = c.PostForm("password")
+	fmt.Println("update:", user)
+
+	models.UpdateUser(user)
+	c.JSON(200, gin.H{
+		"code":    0, //  0成功   -1失败
+		"message": "修改用户成功！",
+		"data":    user,
+	})
 }
