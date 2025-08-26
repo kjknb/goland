@@ -2,6 +2,7 @@ package service
 
 import (
 	"GInchat/models"
+	"GInchat/utils"
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -48,12 +49,36 @@ func CreateUser(c *gin.Context) {
 		c.JSON(-1, gin.H{
 			"message": "密码不一致",
 		})
+		return
 	}
-	user.Password = password
+	hashedPassword := utils.MakePassword(password, "")
+	user.Password = hashedPassword
+	fmt.Printf("原始密码: %s\n", password)
+	fmt.Printf("Bcrypt加密后: %s\n", hashedPassword)
+
 	models.CreateUser(user)
 	c.JSON(200, gin.H{
 		"message": "新增用户成功",
 	})
+}
+
+// FindUserByNameAndPwd
+// @Summary 所有用户
+// @Tags 用户模块
+// @param name query string false "用户名"
+// @param password query string false "密码"
+// @Success 200 {string} json{"code","message"}
+// @Router /user/GetUserList [get]
+func FindUserByNameAndPwd(c *gin.Context) {
+	data := models.UserBasic{}
+	name = c.Query("name")
+	password := c.Query("password")
+	data
+
+	c.JSON(200, gin.H{
+		"message": data,
+	})
+
 }
 
 // DeleteUser
