@@ -19,7 +19,7 @@ func Router() *gin.Engine {
 	r.GET("/index", service.GetIndex)
 	// 可以继续定义更多路由
 	// r.POST("/users", service.CreateUser)
-	r.GET("/user/getUserList", service.GetUserList)
+	r.GET("/user/GetUserList", service.GetUserList)
 
 	return r
 }
