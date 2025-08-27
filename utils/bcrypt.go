@@ -39,20 +39,16 @@ func SetBcryptCost(cost int) {
 	BcryptCost = cost
 }
 
-// 为了保持与原有代码的兼容性
+// ValidPassword 密码验证函数(Bcrypt专用)
+func ValidPassword(plainpwd, hashedPassword string) bool {
+	return CompareBcryptPassword(plainpwd, hashedPassword)
+}
 
-// MakePassword 兼容原有方法的Bcrypt实现
-// 注意：Bcrypt不需要盐值，salt参数将被忽略
-func MakePassword(plainpwd, salt string) string {
+// MakePassword 密码加密函数(Bcrypt专用)
+func MakePassword(plainpwd string) string {
 	hashedPassword, err := GenerateBcryptPassword(plainpwd)
 	if err != nil {
 		return ""
 	}
 	return hashedPassword
-}
-
-// ValidPassword 兼容原有方法的Bcrypt实现
-// 注意：Bcrypt不需要盐值，salt参数将被忽略
-func ValidPassword(plainpwd, salt string, password string) bool {
-	return CompareBcryptPassword(plainpwd, password)
 }
