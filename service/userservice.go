@@ -102,11 +102,20 @@ func FindUserByNameAndPwd(c *gin.Context) {
 		return
 	}
 
-	// 返回用户信息（排除敏感字段）
+	token, err := utils.GenerateToken(user.Identity, user.Name)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"code":    500,
+			"message": "token生成失败",
+		})
+		return
+	}
+
+	// 返回用户信息和token
 	userResponse := gin.H{
 		"identity": user.Identity,
 		"name":     user.Name,
-		// 其他需要返回的字段，但不包括密码
+		"token":    token,
 	}
 
 	c.JSON(200, gin.H{
@@ -115,32 +124,6 @@ func FindUserByNameAndPwd(c *gin.Context) {
 		"data":    userResponse,
 	})
 }
-
-//func FindUserByNameAndPwd(c *gin.Context) {
-//	data := models.UserBasic{}
-//	name := c.Query("name")
-//	password := c.Query("password")
-//	user := models.FindUserByName(name)
-//	if user.Identity == "" {
-//		c.JSON(200, gin.H{
-//			"message": "该用户不存在",
-//		})
-//	}
-//	flag := utils.ValidPassword(password, user.Password)
-//	if !flag {
-//		c.JSON(200, gin.H{
-//			"message": "mima",
-//		})
-//
-//	}
-//
-//	data = models.FindUserByNameAndPwd(name, password)
-//
-//	c.JSON(200, gin.H{
-//		"message": data,
-//	})
-//
-//}
 
 // DeleteUser
 // @Summary 删除用户

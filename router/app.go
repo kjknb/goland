@@ -3,6 +3,7 @@ package router
 import (
 	"GInchat/docs"
 	"GInchat/service" // 导入你存放处理函数的包
+	"GInchat/utils"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -17,16 +18,22 @@ func Router() *gin.Engine {
 
 	// 定义路由
 	r.GET("/index", service.GetIndex)
-	// 可以继续定义更多路由
-	// r.POST("/users", service.CreateUser)
-	r.GET("/user/GetUserList", service.GetUserList)
 
-	r.GET("/user/createUser", service.CreateUser)
+	// 公开路由 - 不需要token认证
+	public := r.Group("/user")
+	{
+		public.POST("/findUserByNameAndPwd", service.FindUserByNameAndPwd)
+		public.GET("/createUser", service.CreateUser)
+	}
 
-	r.GET("/user/deleteUser", service.DeleteUser)
-
-	r.POST("/user/updateUser", service.UpdateUser)
-	r.POST("/user/findUserByNameAndPwd", service.FindUserByNameAndPwd)
+	// 受保护的路由 - 需要token认证
+	protected := r.Group("/user")
+	protected.Use(utils.JWTAuthMiddleware()) // 添加JWT中间件
+	{
+		protected.GET("/GetUserList", service.GetUserList)
+		protected.GET("/deleteUser", service.DeleteUser)
+		protected.POST("/updateUser", service.UpdateUser)
+	}
 
 	return r
 }

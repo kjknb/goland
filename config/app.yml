@@ -1,2 +1,8 @@
+app:
+  name: "GinChat"
+  version: "1.0.0"
 mysql:
   dns: root:123mdx0.0@tcp(127.0.0.1:3306)/GinChat1?charset=utf8mb4&parseTime=True&loc=Local
+jwt:
+  secret: "wGwkVzg1VzH5fTA0X/oyR0XDYymHWtiOWIvBIOAEgSw=" # 替换为您的安全密钥
+  expire: 24 # token有效期(小时)
