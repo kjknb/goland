@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"context"
 	"fmt"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -17,7 +19,10 @@ var DB *gorm.DB
 var (
 	JwtSecret string
 	JwtExpire int
+	Red       *redis.Client
 )
+
+// InitRedis 从配置初始化Redis连接
 
 func InitConfig() {
 	viper.SetConfigName("app")
@@ -135,4 +140,29 @@ func Initmysql() {
 	}
 
 	fmt.Println("MySQL初始化成功")
+}
+
+func InitRedis() {
+	Red = redis.NewClient(&redis.Options{
+		Addr:         viper.GetString("redis.addr"),
+		Password:     viper.GetString("redis.password"),
+		DB:           viper.GetInt("redis.db"),
+		PoolSize:     viper.GetInt("redis.pool_size"),
+		MinIdleConns: viper.GetInt("redis.min_idle_conn"),
+		MaxRetries:   viper.GetInt("redis.max_retries"),
+		DialTimeout:  time.Duration(viper.GetInt("redis.dial_timeout")) * time.Second,
+		ReadTimeout:  time.Duration(viper.GetInt("redis.read_timeout")) * time.Second,
+		WriteTimeout: time.Duration(viper.GetInt("redis.write_timeout")) * time.Second,
+	})
+
+	// 测试连接
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := Red.Ping(ctx).Result()
+	if err != nil {
+		panic(fmt.Sprintf("Redis连接失败: %v", err))
+	}
+
+	fmt.Println("Redis连接成功")
 }
