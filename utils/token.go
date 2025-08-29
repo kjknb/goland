@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"time"
 
@@ -43,10 +44,15 @@ func ParseToken(token string) (*Claims, error) {
 		return jwtSecret, nil
 	})
 
+	if err != nil {
+		return nil, fmt.Errorf("解析token失败: %v", err)
+	}
+
 	if tokenClaims != nil {
 		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
 			return claims, nil
 		}
+		return nil, fmt.Errorf("token无效")
 	}
 
 	return nil, err
@@ -56,8 +62,8 @@ func ParseToken(token string) (*Claims, error) {
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 从请求头中获取 token
-		token := c.Request.Header.Get("Authorization")
-		if token == "" {
+		authHeader := c.Request.Header.Get("Authorization")
+		if authHeader == "" {
 			c.JSON(401, gin.H{
 				"code":    401,
 				"message": "请求未携带token，无权限访问",
@@ -66,12 +72,25 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		// 提取实际的 token (去掉 "Bearer " 前缀)
+		const bearerPrefix = "Bearer "
+		if len(authHeader) < len(bearerPrefix) || authHeader[:len(bearerPrefix)] != bearerPrefix {
+			c.JSON(401, gin.H{
+				"code":    401,
+				"message": "token格式错误",
+			})
+			c.Abort()
+			return
+		}
+
+		token := authHeader[len(bearerPrefix):]
+
 		// 解析 token
 		claims, err := ParseToken(token)
 		if err != nil {
 			c.JSON(401, gin.H{
 				"code":    401,
-				"message": "token无效或已过期",
+				"message": "token无效或已过期: " + err.Error(),
 			})
 			c.Abort()
 			return

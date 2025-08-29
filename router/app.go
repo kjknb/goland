@@ -13,6 +13,9 @@ func Router() *gin.Engine {
 	// 创建默认路由
 	r := gin.Default()
 
+	//首页
+	r.GET("/", service.GetIndex)
+
 	docs.SwaggerInfo.BasePath = ""
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
@@ -23,16 +26,16 @@ func Router() *gin.Engine {
 	public := r.Group("/user")
 	{
 		public.POST("/findUserByNameAndPwd", service.FindUserByNameAndPwd)
-		public.GET("/createUser", service.CreateUser)
+		public.POST("/createUser", service.CreateUser)
 	}
 
 	// 受保护的路由 - 需要token认证
 	protected := r.Group("/user")
 	protected.Use(utils.JWTAuthMiddleware()) // 添加JWT中间件
 	{
-		protected.GET("/GetUserList", service.GetUserList)
-		protected.GET("/deleteUser", service.DeleteUser)
-		protected.POST("/updateUser", service.UpdateUser)
+		protected.POST("/GetUserList", service.GetUserList)
+		protected.DELETE("/deleteUser", service.DeleteUser)
+		protected.PUT("/updateUser", service.UpdateUser)
 	}
 
 	return r

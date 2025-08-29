@@ -20,6 +20,7 @@ var (
 	JwtSecret string
 	JwtExpire int
 	Red       *redis.Client
+	ctx       = context.Background()
 )
 
 // InitRedis 从配置初始化Redis连接
@@ -165,4 +166,31 @@ func InitRedis() {
 	}
 
 	fmt.Println("Redis连接成功")
+}
+
+func Publish(channel, message string) error {
+	err := Red.Publish(ctx, channel, message).Err()
+	if err != nil {
+		return fmt.Errorf("发布消息失败: %v", err)
+	}
+	log.Printf("已向频道 [%s] 发送消息: %s\n", channel, message)
+	return nil
+}
+
+// Subscribe 订阅指定频道并处理消息
+func Subscribe(channel string) {
+	sub := Red.Subscribe(ctx, channel)
+	defer sub.Close()
+
+	// 接收订阅确认
+	if _, err := sub.Receive(ctx); err != nil {
+		log.Fatal("订阅失败: ", err)
+	}
+	log.Printf("已订阅频道: %s\n", channel)
+
+	// 通过Go通道接收消息
+	ch := sub.Channel()
+	for msg := range ch {
+		fmt.Printf("收到来自频道 [%s] 的消息: %s\n", msg.Channel, msg.Payload)
+	}
 }
